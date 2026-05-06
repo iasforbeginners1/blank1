@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game - Mauryan Administration</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .hidden { display: none; }
+        button {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background-color: #34495e; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th { background-color: #f8f9fa; }
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            width: 90%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .score-box {
+            font-size: 20px;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .correct { background-color: #d4edda; color: #155724; }
+        .incorrect { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="stage1">
+    <h1>Memory Game: मौर्य प्रशासन</h1>
+    <p>क्या आप 2 मिनट में इन महत्वपूर्ण तीर्थों को याद कर सकते हैं?</p>
+    <button onclick="startStage2()">Entry (शुरू करें)</button>
+</div>
+
+<div class="container hidden" id="stage2">
+    <div class="timer" id="timerDisplay">02:00</div>
+    <h3>ध्यान से पढ़ें और याद करें</h3>
+    <table>
+        <tr><th>तीर्थ (Post)</th><th>विवरण (Details)</th></tr>
+        <tr><td>समाहर्ता</td><td>राजस्व विभाग का सर्वोच्च अधिकारी</td></tr>
+        <tr><td>सन्निधाता</td><td>राजकीय कोषाध्यक्ष</td></tr>
+        <tr><td>प्रदेश्टा</td><td>फौजदारी न्यायालय का न्यायाधीश</td></tr>
+        <tr><td>व्यावहारिक</td><td>दीवानी न्यायालय का मुख्य न्यायाधीश</td></tr>
+        <tr><td>नागरक</td><td>नगर का प्रमुख अधिकारी</td></tr>
+        <tr><td>अंतपाल</td><td>सीमावर्ती दुर्गों का रक्षक</td></tr>
+    </table>
+    <button onclick="startStage3()">याद हो गया (Start Quiz)</button>
+</div>
+
+<div class="container hidden" id="stage3">
+    <h3>खाली स्थान भरें</h3>
+    <form id="quizForm">
+        <table>
+            <tr><td>समाहर्ता</td><td><input type="text" id="ans1" placeholder="Type here..."></td></tr>
+            <tr><td>सन्निधाता</td><td><input type="text" id="ans2" placeholder="Type here..."></td></tr>
+            <tr><td>प्रदेश्टा</td><td><input type="text" id="ans3" placeholder="Type here..."></td></tr>
+            <tr><td>व्यावहारिक</td><td><input type="text" id="ans4" placeholder="Type here..."></td></tr>
+            <tr><td>नागरक</td><td><input type="text" id="ans5" placeholder="Type here..."></td></tr>
+            <tr><td>अंतपाल</td><td><input type="text" id="ans6" placeholder="Type here..."></td></tr>
+        </table>
+        <button type="button" onclick="checkScore()">Check Score</button>
+    </form>
+</div>
+
+<div class="container hidden" id="stage4">
+    <h1>आपका स्कोर</h1>
+    <div id="finalScore" class="score-box"></div>
+    <div id="feedbackDetails" style="text-align: left; margin-top: 20px;"></div>
+    <br>
+    <button onclick="location.reload()">दोबारा खेलें</button>
+</div>
+
+<script>
+    let timeLeft = 120;
+    let timerInterval;
+
+    const answers = [
+        "राजस्व विभाग का सर्वोच्च अधिकारी",
+        "राजकीय कोषाध्यक्ष",
+        "फौजदारी न्यायालय का न्यायाधीश",
+        "दीवानी न्यायालय का मुख्य न्यायाधीश",
+        "नगर का प्रमुख अधिकारी",
+        "सीमावर्ती दुर्गों का रक्षक"
+    ];
+
+    function startStage2() {
+        document.getElementById('stage1').classList.add('hidden');
+        document.getElementById('stage2').classList.remove('hidden');
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function updateTimer() {
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        document.getElementById('timerDisplay').innerText = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            startStage3();
+        }
+        timeLeft--;
+    }
+
+    function startStage3() {
+        clearInterval(timerInterval);
+        document.getElementById('stage2').classList.add('hidden');
+        document.getElementById('stage3').classList.remove('hidden');
+    }
+
+    function checkScore() {
+        let score = 0;
+        let feedbackHtml = "<ul>";
+        for (let i = 1; i <= 6; i++) {
+            let userAns = document.getElementById('ans' + i).value.trim();
+            if (userAns === answers[i-1]) {
+                score++;
+                feedbackHtml += `<li class='correct'>✓ ${userAns} (सही)</li>`;
+            } else {
+                feedbackHtml += `<li class='incorrect'>✗ सही उत्तर: ${answers[i-1]}</li>`;
+            }
+        }
+        feedbackHtml += "</ul>";
+
+        document.getElementById('stage3').classList.add('hidden');
+        document.getElementById('stage4').classList.remove('hidden');
+        
+        let scoreMsg = `आपका स्कोर: ${score} / 6`;
+        document.getElementById('finalScore').innerText = scoreMsg;
+        document.getElementById('finalScore').className = score >= 4 ? "score-box correct" : "score-box incorrect";
+        document.getElementById('feedbackDetails').innerHTML = feedbackHtml;
+    }
+</script>
+
+</body>
+</html>
